@@ -1,0 +1,229 @@
+// SPDX-License-Identifier: GPL-2.0-or-later OR MIT
+
+#include "mt7621.dtsi"
+
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/input/input.h>
+
+/ {
+	compatible = "arcadyan,we410443-tc", "mediatek,mt7621-soc";
+	model = "Arcadyan WE410443-TC";
+
+	aliases {
+		led-boot = &led_status_blue;
+		led-failsafe = &led_status_red;
+		led-running = &led_status_blue;
+		led-upgrade = &led_status_blue;
+		label-mac-device = &gmac0;
+	};
+
+	chosen {
+		bootargs = "console=ttyS0,57600";
+	};
+
+	leds {
+		compatible = "gpio-leds";
+
+		led_status_orange {
+			label = "orange:status";
+			gpios = <&gpio 42 GPIO_ACTIVE_HIGH>;
+		};
+
+		led_status_blue {
+			label = "blue:status";
+			gpios = <&gpio 41 GPIO_ACTIVE_HIGH>;
+		};
+		
+		led_status_red {
+			label = "blue:status";
+			gpios = <&gpio 44 GPIO_ACTIVE_HIGH>;
+		};
+	};
+
+	keys {
+		compatible = "gpio-keys";
+
+		reset {
+			label = "reset";
+			gpios = <&gpio 3 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_RESTART>;
+		};
+		
+		wps {
+			label = "wps";
+			gpios = <&gpio 18 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_WPS_BUTTON>;
+		};
+	};
+};
+
+&spi0 {
+	status = "okay";
+
+	flash@0 {
+		compatible = "jedec,spi-nor";
+		reg = <0>;
+		spi-max-frequency = <50000000>;
+
+		partitions {
+			compatible = "fixed-partitions";
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			partition@0 {
+				label = "u-boot";
+				reg = <0x0 0x30000>;
+				read-only;
+			};
+
+			partition@30000 {
+				label = "u-boot-env";
+				reg = <0x30000 0x10000>;
+				read-only;
+			};
+
+			factory: partition@40000 {
+				label = "factory";
+				reg = <0x40000 0x10000>;
+				read-only;
+			};
+
+			partition@50000 {
+				compatible = "denx,uimage";
+				label = "firmware";
+				reg = <0x50000 0x7b0000>;
+			};
+
+			partition@800000 {
+				label = "crash_dump";
+				reg = <0x800000 0x10000>;
+				read-only;
+			};
+
+			partition@810000 {
+				label = "firmware_backup";
+				reg = <0x810000 0x7b0000>;
+				read-only;
+			};
+			partition@fc0000 {
+				label = "seccfg";
+				reg = <0xfc0000 0x10000>;
+				read-only;
+			};
+			partition@fd0000 {
+				label = "pricfg";
+				reg = <0xfd0000 0x10000>;
+				read-only;
+			};
+			partition@fe0000 {
+				label = "arc_log";
+				reg = <0xfe0000 0x10000>;
+				read-only;
+			};
+		};
+	};
+};
+
+
+&pcie {
+	status = "okay";
+};
+
+&pcie0 {
+	wifi@0,0 {
+		compatible = "mediatek,mt76";
+		reg = <0x0000 0 0 0 0>;
+		mediatek,mtd-eeprom = <&factory 0x0>;
+		ieee80211-freq-limit = <2400000 2500000>;
+	};
+};
+
+&pcie1 {
+	wifi@0,0 {
+		compatible = "mediatek,mt76";
+		reg = <0x0000 0 0 0 0>;
+		mediatek,mtd-eeprom = <&factory 0x8000>;
+		ieee80211-freq-limit = <5000000 6000000>;
+	};
+}
+
+&gmac0 {
+	nvmem-cells = <&macaddr_factory_fff0>;
+	nvmem-cell-names = "mac-address";
+};
+
+&gmac1 {
+	nvmem-cells = <&macaddr_factory_fff6>;
+	nvmem-cell-names = "mac-address";
+};
+
+&switch0 {
+	/* must delete compatible property */
+	/delete-property/ compatible;
+};
+
+&hnat {
+	mtketh-wan = "eth1";
+	mtketh-ppd = "eth0";
+	mtketh-lan = "eth0";
+	ext-devices = "wlan0","wlan1","rax0","ra0", "rai0","apclii0","apclix0", "apcli0";
+	mtketh-max-gmac = <2>;
+	status = "okay";
+};
+
+&gsw {
+	mediatek,mdio = <&mdio>;
+	mediatek,portmap = "llllw";
+	mediatek,mcm;
+	mt7530,direct-phy-access;
+
+	resets = <&rstctrl 2>;
+	reset-names = "mcm";
+
+	port5: port@5 {
+		compatible = "mediatek,mt753x-port";
+		reg = <5>;
+		phy-mode = "rgmii";
+		fixed-link {
+			speed = <1000>;
+			full-duplex;
+		};
+	};
+
+	port6: port@6 {
+		compatible = "mediatek,mt753x-port";
+		reg = <6>;
+		phy-mode = "rgmii";
+		fixed-link {
+			speed = <1000>;
+			full-duplex;
+		};
+	};
+
+	mdio-bus {
+		#address-cells = <1>;
+		#size-cells = <0>;
+	};
+};
+
+
+&state_default {
+	gpio {
+		groups = "i2c", "jtag";
+		function = "gpio";
+	};
+};
+
+&factory {
+	compatible = "nvmem-cells";
+	#address-cells = <1>;
+	#size-cells = <1>;
+
+	macaddr_factory_fff0: macaddr@e000 {
+		reg = <0xfff0 0x6>;
+	};
+
+	macaddr_factory_fff6: macaddr@e006 {
+		reg = <0xfff6 0x6>;
+	};
+};
