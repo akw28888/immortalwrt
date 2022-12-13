@@ -24,17 +24,17 @@
 	leds {
 		compatible = "gpio-leds";
 
-		led_status_orange {
+		led_status_orange: status_orange {
 			label = "orange:status";
 			gpios = <&gpio 42 GPIO_ACTIVE_HIGH>;
 		};
 
-		led_status_blue {
+		led_status_blue: status_blue {
 			label = "blue:status";
 			gpios = <&gpio 41 GPIO_ACTIVE_HIGH>;
 		};
 		
-		led_status_red {
+		led_status_red: status_red {
 			label = "blue:status";
 			gpios = <&gpio 44 GPIO_ACTIVE_HIGH>;
 		};
