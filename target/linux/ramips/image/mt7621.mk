@@ -158,7 +158,7 @@ TARGET_DEVICES += ampedwireless_ally-00x19k
 
 define Device/arcadyan_we410443-tc
   $(Device/dsa-migration)
-  IMAGE_SIZE := 7872k
+  IMAGE_SIZE := 15808k
   DEVICE_VENDOR := Arcadyan
   DEVICE_MODEL := WE410443-TC
   DEVICE_PACKAGES := kmod-mt7615d luci-app-mtwifi uboot-envtools
