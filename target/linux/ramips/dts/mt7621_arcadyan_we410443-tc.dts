@@ -91,20 +91,9 @@
 			partition@50000 {
 				compatible = "denx,uimage";
 				label = "firmware";
-				reg = <0x50000 0x7b0000>;
+				reg = <0x50000 0xf70000>;
 			};
 
-			partition@800000 {
-				label = "crash_dump";
-				reg = <0x800000 0x10000>;
-				read-only;
-			};
-
-			partition@810000 {
-				label = "firmware_backup";
-				reg = <0x810000 0x7b0000>;
-				read-only;
-			};
 			partition@fc0000 {
 				label = "seccfg";
 				reg = <0xfc0000 0x10000>;
